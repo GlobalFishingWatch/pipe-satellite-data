@@ -1,3 +1,0 @@
-python pipe_satellite_data/process/sat_locations.py -u smpiano@gmail.com -p 4y5bzJeiWyZHgwi -d 2018-01-01 -gcsp gs://scratch-matias/satellite-data -bqt world-fishing-827:scratch_matias.spacetrack_raw_tle_ -bqsl world-fishing-827:scratch_matias.satellite_positions_one_second_resolution -nrids 25114 -sd /home/matu/repo/gfw/pipeline/pipe-satellite-data/assets
-
-./scripts/run.sh satellite_data_daily "smpiano@gmail.com" "4y5bzJeiWyZHgwi" "2018-01-01" "gs://scratch-matias/satellite2-data" "world-fishing-827:scratch_matias.spacetrack2_raw_tle_" "world-fishing-827:scratch_matias.satellite2_positions_one_second_resolution" "25114 40019"

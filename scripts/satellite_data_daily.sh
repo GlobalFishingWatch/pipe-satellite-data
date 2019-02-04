@@ -47,7 +47,7 @@ python ${LIB}/process/sat_locations.py $options
 result=$?
 if [ $result -eq 0 ]
 then
-  echo "Finished downloading Satellite data for $DATE, you can find it here $GCS_PATH."
+  echo "Finished downloading Satellite data for $DATE, you can find it here $GCSP_DIRECTORY."
 else
   echo "Error downloading Satellite data."
   display_usage

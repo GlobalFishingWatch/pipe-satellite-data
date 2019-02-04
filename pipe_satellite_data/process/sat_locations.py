@@ -27,19 +27,27 @@ class SatLocations():
     def process(self, date_ts, norad_ids):
         # dt = datetimeFromTimestamp(date_ts)
         dt = dateutil_parse(date_ts)
-        self.date_partition = dt.strftime('%Y%m%d')
+        self.str_date = dt.strftime('%Y%m%d')
 
         # get TLEs for norad_ids for the date
         tles = fetch_TLE(self.st_auth, norad_ids, dt)
         tles, tles_4_sats = tee(tles)
 
         #store in GCP
-        self.store(tles, '%s/%s_%s.json' % ("download", "tles", self.date_partition), self.destination_tle, '%s/%s' % (self.schema_directory, 'tle.schema.json'))
+        self.store(tles,
+                   '%s/%s_%s.json' % ("download", "tles", self.str_date),
+                   self.destination_tle,
+                   '%s/%s' % (self.schema_directory, 'tle.schema.json')
+                   )
 
 
         sat_locations = satellite_locations(tles_4_sats, dt)
 
-        self.store(sat_locations, '%s/%s_%s.json' % ("download", "satellite_locations", self.date_partition), self.destination_sat_locations, '%s/%s' % (self.schema_directory, 'sat_location.schema.json'))
+        self.store(sat_locations,
+                   '%s/%s_%s.json' % ("download", "satellite_locations", self.str_date),
+                   self.destination_sat_locations,
+                   '%s/%s' % (self.schema_directory, 'sat_location.schema.json')
+                   )
 
         # compute locations for each id
         # for location in satellite_locations(tles, dt):
@@ -65,7 +73,9 @@ class SatLocations():
         print(command)
         os.system(command)
 
-        command='bq load --replace --source_format=NEWLINE_DELIMITED_JSON --project_id=world-fishing-827 --time_partitioning_type=DAY \'%s$%s\' %s %s' % (destination_table, self.date_partition, gcsp_path_file, schema)
+        command=('bq load --source_format=NEWLINE_DELIMITED_JSON '
+                 '--project_id=world-fishing-827 '
+                 '\'%s_%s\' %s %s' % (destination_table, self.str_date, gcsp_path_file, schema))
         print(command)
         os.system(command)
 
@@ -77,7 +87,7 @@ if __name__ == '__main__':
     parser.add_argument('-u','--auth_user', help='The Username to access the Space Track API', required=True)
     parser.add_argument('-p','--auth_pass', help='The Password to access the Space Track API', required=True)
     parser.add_argument('-d','--date', help='Day to be downloaded format YYYY-MM-DD', required=True)
-    parser.add_argument('-gcsp','--gcs_path', help='GCS path to store downloaded files. eg: "gs://bucket/spire/download" you will end up with "gs://bucket/spire/download/YEAR"', required=True)
+    parser.add_argument('-gcsp','--gcs_path', help='GCS path to store downloaded files. eg: "gs://scratch-matias/satellite-data" you will end up with "gs://scratch-matias/satellite-data/download/YEAR"', required=True)
     parser.add_argument('-bqt','--bq_tle', help='Big Query Table project:dataset.table to store TLE items', required=True)
     parser.add_argument('-bqsl','--bq_sat_locations', help='Big Query Table project:dataset.table to store Satellite Locations', required=True)
     parser.add_argument('-nrids','--norad_ids', nargs='+', help='List of norad_ids or satellite names', required=True)
