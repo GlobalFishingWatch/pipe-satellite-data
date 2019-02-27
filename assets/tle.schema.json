@@ -1,0 +1,157 @@
+[
+  {
+    "name": "EPOCH_MICROSECONDS",
+    "type": "STRING",
+    "description": "The specific time at which the position of a satellite is defined."
+  },
+  {
+    "name": "SEMIMAJOR_AXIS",
+    "type": "STRING",
+    "description": "the sum of the periapsis and apoapsis distances divided by two. For circular orbits, the semimajor axis is the distance between the centers of the bodies, not the distance of the bodies from the center of mass."
+  },
+  {
+    "name": "BSTAR",
+    "type": "STRING",
+    "description": ""
+  },
+  {
+    "name": "CLASSIFICATION_TYPE",
+    "type": "STRING",
+    "description": ""
+  },
+  {
+    "name": "TLE_LINE0",
+    "type": "STRING",
+    "description": ""
+  },
+  {
+    "name": "FILE",
+    "type": "STRING",
+    "description": ""
+  },
+  {
+    "name": "ECCENTRICITY",
+    "type": "STRING",
+    "description": ""
+  },
+  {
+    "name": "ELEMENT_SET_NO",
+    "type": "STRING",
+    "description": ""
+  },
+  {
+    "name": "COMMENT",
+    "type": "STRING",
+    "description": ""
+  },
+  {
+    "name": "MEAN_MOTION_DDOT",
+    "type": "STRING",
+    "description": ""
+  },
+  {
+    "name": "RA_OF_ASC_NODE",
+    "type": "STRING",
+    "description": ""
+  },
+  {
+    "name": "OBJECT_ID",
+    "type": "STRING",
+    "description": ""
+  },
+  {
+    "name": "EPHEMERIS_TYPE",
+    "type": "STRING",
+    "description": ""
+  },
+  {
+    "name": "OBJECT_NAME",
+    "type": "STRING",
+    "description": ""
+  },
+  {
+    "name": "MEAN_MOTION",
+    "type": "STRING",
+    "description": ""
+  },
+  {
+    "name": "ORIGINATOR",
+    "type": "STRING",
+    "description": ""
+  },
+  {
+    "name": "TLE_LINE2",
+    "type": "STRING",
+    "description": ""
+  },
+  {
+    "name": "TLE_LINE1",
+    "type": "STRING",
+    "description": ""
+  },
+  {
+    "name": "ARG_OF_PERICENTER",
+    "type": "STRING",
+    "description": ""
+  },
+  {
+    "name": "OBJECT_TYPE",
+    "type": "STRING",
+    "description": ""
+  },
+  {
+    "name": "PERIOD",
+    "type": "STRING",
+    "description": ""
+  },
+  {
+    "name": "INTLDES",
+    "type": "STRING",
+    "description": ""
+  },
+  {
+    "name": "MEAN_ANOMALY",
+    "type": "STRING",
+    "description": ""
+  },
+  {
+    "name": "EPOCH",
+    "type": "STRING",
+    "description": ""
+  },
+  {
+    "name": "MEAN_MOTION_DOT",
+    "type": "STRING",
+    "description": ""
+  },
+  {
+    "name": "NORAD_CAT_ID",
+    "type": "STRING",
+    "description": ""
+  },
+  {
+    "name": "INCLINATION",
+    "type": "STRING",
+    "description": ""
+  },
+  {
+    "name": "PERIGEE",
+    "type": "STRING",
+    "description": ""
+  },
+  {
+    "name": "REV_AT_EPOCH",
+    "type": "STRING",
+    "description": ""
+  },
+  {
+    "name": "OBJECT_NUMBER",
+    "type": "STRING",
+    "description": ""
+  },
+  {
+    "name": "APOGEE",
+    "type": "STRING",
+    "description": ""
+  }
+]
