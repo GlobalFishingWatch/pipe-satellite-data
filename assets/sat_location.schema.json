@@ -1,0 +1,27 @@
+[
+  {
+    "name": "norad_id",
+    "type": "INTEGER",
+    "description": "Sequential number assigned by US Air Force as objects are cataloged."
+  },
+  {
+    "name": "lat",
+    "type": "FLOAT",
+    "description": "Latitud where the satellite is positioned. (+N)."
+  },
+  {
+    "name": "lon",
+    "type": "float",
+    "description": "Longitud where the satellite is positioned. (+E)."
+  },
+  {
+    "name": "timestamp",
+    "type": "timestamp",
+    "description": "Timestamp when the satellite saved the data."
+  },
+  {
+    "name": "altitude",
+    "type": "float",
+    "description": "Geocentric height above sea level. Unit: meters."
+  }
+]
