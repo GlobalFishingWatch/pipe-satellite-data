@@ -1,4 +1,3 @@
-# from pipe_tools.coders import JSONDict
 import json
 import os
 import argparse
@@ -6,7 +5,6 @@ import time
 from shutil import rmtree
 from itertools import tee
 
-# from pipe_tools.timestamp import datetimeFromTimestamp
 from dateutil.parser import parse as dateutil_parse
 
 from pipe_satellite_data.utils.locations import satellite_locations

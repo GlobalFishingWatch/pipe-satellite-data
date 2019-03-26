@@ -5,8 +5,6 @@ import itertools as it
 
 import pytz
 import udatetime
-# from dateutil.parser import parse as dateutil_parse
-# from pipe_tools.utils.timestamp import as_timestamp
 
 import ephem
 from spacetrack import SpaceTrackClient
@@ -88,7 +86,6 @@ def satellite_locations(tles, dt):
                 norad_id=tle['NORAD_CAT_ID'],
                 lat=lat,
                 lon=lon,
-                # timestamp=ts
                 timestamp=ts,
                 altitude=elevation
             )

@@ -4,7 +4,7 @@ import os
 from airflow import DAG
 from airflow.contrib.operators.kubernetes_pod_operator import KubernetesPodOperator
 
-from pipe_tools.airflow.models import DagFactory
+from airflow_ext.gfw.models import DagFactory
 
 
 PIPELINE = "pipe_k8s_satellite_data"
