@@ -71,8 +71,8 @@ class SatLocations():
         print(command)
         os.system(command)
 
-        command=('bq load --source_format=NEWLINE_DELIMITED_JSON '
-                 '--project_id=world-fishing-827 '
+        command=('bq load --replace --source_format=NEWLINE_DELIMITED_JSON '
+                 '--project_id=world-fishing-827 --clustering_fields norad_id '
                  '\'%s_%s\' %s %s' % (destination_table, self.str_date, gcsp_path_file, schema))
         print(command)
         os.system(command)
