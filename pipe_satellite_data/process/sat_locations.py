@@ -78,7 +78,7 @@ class SatLocations():
                  '\'%s_%s\' %s %s' % (clustering_value, destination_table, self.str_date, gcsp_path_file, schema))
         print(command)
         if os.system(command) != 0:
-            raise Error('The command %s failed.'.format(command))
+            raise Exception('The command %s failed.'.format(command))
 
 
 
