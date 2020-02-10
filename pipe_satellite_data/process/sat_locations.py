@@ -57,7 +57,7 @@ class SatLocations():
         print("writing the tle file")
         with open(json_file_name, 'w') as outfile:
             for message in messages:
-                print('.')
+                print('.', end='')
                 json.dump(message, outfile)
                 outfile.write("\n")
             print("closing the file")
