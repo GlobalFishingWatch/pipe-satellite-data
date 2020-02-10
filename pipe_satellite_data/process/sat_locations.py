@@ -70,16 +70,18 @@ class SatLocations():
         gcsp_path_file = '%s/%s' % (self.destination_bucket, os.path.basename(json_file_name))
         command='gsutil -m -q %s cp %s %s' % (BOTO, json_file_name, gcsp_path_file)
         print(command)
-        if os.system(command) != 0:
-            raise Exception('The GCS command <{0}> failed.'.format(command))
+        os.system(command)
+        # if os.system(command) != 0:
+        #     raise Exception('The GCS command <{0}> failed.'.format(command))
 
         clustering_value = '--clustering_fields {0}'.format(clustering) if clustering else ''
         command=('bq load --replace=true --source_format=NEWLINE_DELIMITED_JSON '
                  '--project_id=world-fishing-827 %s '
                  '\'%s_%s\' %s %s' % (clustering_value, destination_table, self.str_date, gcsp_path_file, schema))
         print(command)
-        if os.system(command) != 0:
-            raise Exception('The BigQuery command <{0}> failed.'.format(command))
+        os.system(command)
+        # if os.system(command) != 0:
+        #     raise Exception('The BigQuery command <{0}> failed.'.format(command))
 
 
 
