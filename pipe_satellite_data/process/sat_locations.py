@@ -44,7 +44,8 @@ class SatLocations():
         self.store(sat_locations,
                    '%s/%s_%s.json' % ("download", "satellite_locations", self.str_date),
                    self.destination_sat_locations,
-                   '%s/%s' % (self.schema_directory, 'sat_location.schema.json')
+                   '%s/%s' % (self.schema_directory, 'sat_location.schema.json'),
+                   "norad_id"
                    )
 
         # compute locations for each id
@@ -52,7 +53,7 @@ class SatLocations():
         #     yield json.loads(json.dumps(location))
 
 
-    def store(self, messages, json_file_name, destination_table, schema):
+    def store(self, messages, json_file_name, destination_table, schema, clustering=None):
         print "storing json_file_name=%s schema=%s" % (json_file_name, schema)
         print "writing the tle file"
         with open(json_file_name, 'w') as outfile:
@@ -71,11 +72,13 @@ class SatLocations():
         print(command)
         os.system(command)
 
+        clustering_value = '--clustering_fields {0}'.format(clustering) if clustering else ''
         command=('bq load --replace=true --source_format=NEWLINE_DELIMITED_JSON '
-                 '--project_id=world-fishing-827 --clustering_fields norad_id '
-                 '\'%s_%s\' %s %s' % (destination_table, self.str_date, gcsp_path_file, schema))
+                 '--project_id=world-fishing-827 %s '
+                 '\'%s_%s\' %s %s' % (clustering_value, destination_table, self.str_date, gcsp_path_file, schema))
         print(command)
-        os.system(command)
+        if os.system(command) != 0:
+            raise Error('The command %s failed.'.format(command))
 
 
 
