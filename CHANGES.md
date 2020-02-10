@@ -10,12 +10,12 @@ Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to
 
 ### Added
 
-## v1.1.0 - 2019-03-27
+## v1.1.0 - 2020-02-10
 
 ### Added
 
 * [GlobalFishingWatch/GFW-Tasks#1181](https://github.com/GlobalFishingWatch/GFW-Tasks/issues/1181): Adds
-  replace flag and clustering_fields flag when uploads the information to BigQuery tables.
+  replace flag when uploads the information to BigQuery tables.
 
 ## v1.0.0 - 2019-03-27
 
