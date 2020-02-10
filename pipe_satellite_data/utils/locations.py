@@ -53,7 +53,7 @@ def fetch_TLE(st_auth, norad_ids, dt):
 
 def mycallback(until):
     duration = int(round(until - time.time()))
-    print('Sleeping for {:d} seconds.'.format(duration))
+    print(('Sleeping for {:d} seconds.'.format(duration)))
 
 def as_timestamp(dt):
     return (pytz.UTC.localize(dt) - EPOCH).total_seconds()
@@ -76,7 +76,7 @@ def satellite_locations(tles, dt):
         tle_lines = [str(tle['TLE_LINE%s' % i]) for i in range(3)]
         orbit = ephem.readtle(*tle_lines)
 
-        for ts in xrange(start_ts, end_ts):
+        for ts in range(start_ts, end_ts):
             orbit.compute(datetime.utcfromtimestamp(ts).strftime("%Y/%m/%d %H:%M:%S"))
             lon = ephem.degrees(orbit.sublong) * 180 / 3.1416
             lat = ephem.degrees(orbit.sublat) * 180 / 3.1416

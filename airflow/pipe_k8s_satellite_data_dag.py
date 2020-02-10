@@ -26,10 +26,10 @@ class K8sSatelliteDataDagFactory(DagFactory):
         source_date = self.source_date()
         config['date'] = source_date[0]
         config['date_nodash'] = source_date[1]
-        print('config = %s' % (config))
+        print(('config = %s' % (config)))
 
         satellite_data_image = "{docker_image}".format(**config)
-        print('satellite_data_image = %s' % satellite_data_image)
+        print(('satellite_data_image = %s' % satellite_data_image))
 
         satellite_data_args = ['{user}', '{pass}',
                                '{date}',
@@ -41,7 +41,7 @@ class K8sSatelliteDataDagFactory(DagFactory):
             satellite_data_args[i]=satellite_data_args[i].format(**config)
 
         satellite_data_args.insert(0,'satellite_data_daily')
-        print('satellite_data_args = %s' % satellite_data_args)
+        print(('satellite_data_args = %s' % satellite_data_args))
         entrypoint="./scripts/run.sh"
 
         satellite_data_args.insert(0,entrypoint)
