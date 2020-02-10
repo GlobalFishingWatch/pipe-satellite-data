@@ -153,5 +153,10 @@
     "name": "APOGEE",
     "type": "STRING",
     "description": ""
+  },
+  {
+    "name": "DECAYED",
+    "type": "STRING",
+    "description": ""
   }
 ]
