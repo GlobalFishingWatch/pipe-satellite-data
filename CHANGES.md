@@ -10,12 +10,22 @@ Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to
 
 ### Added
 
-## v1.1.0 - 2020-02-10
+## v2.0.0 - 2020-02-11
 
 ### Added
 
 * [GlobalFishingWatch/GFW-Tasks#1181](https://github.com/GlobalFishingWatch/GFW-Tasks/issues/1181): Adds
   replace flag when uploads the information to BigQuery tables.
+
+
+### Changed
+
+* [GlobalFishingWatch/GFW-Tasks#1181](https://github.com/GlobalFishingWatch/GFW-Tasks/issues/1181): Changes
+  the CLOUD_SDK_VERSION to 268.0.0
+  The pipe-tools version to v3.1.0
+  The python version to 3.7
+  The way of calling the flexible_operator.
+  Updates the TLE schema wuth DECAYED field
 
 ## v1.0.0 - 2019-03-27
 
