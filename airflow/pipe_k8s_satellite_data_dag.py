@@ -39,7 +39,7 @@ class K8sSatelliteDataDagFactory(DagFactory):
                 'pool':'k8operators_limit',
                 'docker_run':'{docker_run}'.format(**config),
                 'image':'{docker_image}'.format(**config),
-                'name':'satellite-data-{date_nodash}'.format(**config),
+                'name':'satellite-data',
                 'dag':dag,
                 'arguments':satellite_data_args
             })
