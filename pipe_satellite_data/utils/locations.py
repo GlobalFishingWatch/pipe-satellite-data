@@ -46,8 +46,8 @@ def fetch_TLE(st_auth, norad_ids, dt):
         empty_norad_ids = norad_ids.copy()
         days_before = 0
         # Iterates until all norad_id has TLE content
-        while len(empty_norad_ids) != 0:
-            print('=================')
+        while len(empty_norad_ids) != 0 or days_before >= 7:
+            print('======= FETCH TLE ==========')
             print(('Empty norad_ids: {}'.format(empty_norad_ids)))
             print(('Days before: {}'.format(days_before)))
 
@@ -62,10 +62,7 @@ def fetch_TLE(st_auth, norad_ids, dt):
 
             # filter to just one TLE per norad_id
             for norad_id, tles_group in it.groupby(tle_list, key=lambda x: x['NORAD_CAT_ID']):
-                aux=[]
-                for tle in tles_group:
-                    aux.append(tle)
-                norad_dict[norad_id]=aux
+                norad_dict[norad_id]=[tle for tle in tles_group]
                 empty_norad_ids.remove(norad_id)
 
             print(('Norad Dict: {}'.format(norad_dict)))
@@ -76,11 +73,8 @@ def fetch_TLE(st_auth, norad_ids, dt):
                 sleep(4)
 
         # Collect all tles from dictionary
-        # for tle in norad_dict.values():
-        #     yield tle
         for tles_list_by_norad in norad_dict.values():
             for tle in tles_list_by_norad:
-                # flattened.append(tle)
                 yield tle
 
 

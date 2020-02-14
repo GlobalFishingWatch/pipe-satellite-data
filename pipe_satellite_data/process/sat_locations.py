@@ -56,10 +56,13 @@ class SatLocations():
         print(("storing json_file_name=%s schema=%s" % (json_file_name, schema)))
         print("writing the tle file")
         with open(json_file_name, 'w') as outfile:
+            index=0
             for message in messages:
-                print('.', end='')
+                if index%1000 == 0:
+                    print('.', end='')
                 json.dump(message, outfile)
                 outfile.write("\n")
+                index+=1
             print("closing the file")
             outfile.close()
 
