@@ -10,6 +10,7 @@ import ephem
 import itertools as it
 import pytz
 import spacetrack.operators as op
+import time
 import udatetime
 import ujson as json
 
@@ -69,8 +70,8 @@ def fetch_TLE(st_auth, norad_ids, dt):
             days_before+=1
             if len(empty_norad_ids) > 0:
                 # Suspend to avoid https://pythonhosted.org/spacetrack/usage.html#rate-limiter
-                print('Suspend for at least 4 seconds...')
-                sleep(4)
+                print('Suspend for at least 3 minutes...')
+                sleep(3*60)
 
         # Collect all tles from dictionary
         for tles_list_by_norad in norad_dict.values():
