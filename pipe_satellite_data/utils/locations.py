@@ -66,12 +66,11 @@ def fetch_TLE(st_auth, norad_ids, dt):
                 norad_dict[norad_id]=[tle for tle in tles_group]
                 empty_norad_ids.remove(norad_id)
 
-            print(('Norad Dict: {}'.format(norad_dict)))
             days_before+=1
             if len(empty_norad_ids) > 0:
                 # Suspend to avoid https://pythonhosted.org/spacetrack/usage.html#rate-limiter
-                print('Suspend for at least 3 minutes...')
-                sleep(3*60)
+                print('Suspend for at least 10 seconds...')
+                sleep(10)
 
         # Collect all tles from dictionary
         for tles_list_by_norad in norad_dict.values():
@@ -83,6 +82,7 @@ def fetch_TLE(st_auth, norad_ids, dt):
 def mycallback(until):
     duration = int(round(until - time.time()))
     print(('Sleeping for {:d} seconds.'.format(duration)))
+    sleep(duration)
 
 def as_timestamp(dt):
     return (pytz.UTC.localize(dt) - EPOCH).total_seconds()
