@@ -82,7 +82,6 @@ def fetch_TLE(st_auth, norad_ids, dt):
 def mycallback(until):
     duration = int(round(until - time.time()))
     print(('Sleeping for {:d} seconds.'.format(duration)))
-    sleep(duration)
 
 def as_timestamp(dt):
     return (pytz.UTC.localize(dt) - EPOCH).total_seconds()
