@@ -1,14 +1,18 @@
 from datetime import datetime
 from datetime import timedelta
-import ujson as json
-import itertools as it
 
-import pytz
-import udatetime
+# Using the library https://pythonhosted.org/spacetrack/usage.html
+from spacetrack import SpaceTrackClient
+
+from time import sleep
 
 import ephem
-from spacetrack import SpaceTrackClient
+import itertools as it
+import pytz
 import spacetrack.operators as op
+import time
+import udatetime
+import ujson as json
 
 
 EPOCH = udatetime.utcfromtimestamp(0)
@@ -34,26 +38,50 @@ def fetch_TLE(st_auth, norad_ids, dt):
     # remote timezone if present
     dt = dt.replace(tzinfo=None)
 
-    # Search from the given date and 3 days ahead, in case there is no data for our target date
-    decay_epoch = op.inclusive_range(dt, (dt + timedelta(3)))
-
     norad_ids = [str(i) for i in norad_ids]
 
     # retrieve potentially multiple TLEs for each norad_id
 
     if norad_ids:
-        response = st.tle(norad_cat_id=','.join(norad_ids), orderby='NORAD_CAT_ID', format='json', epoch=decay_epoch)
+        norad_dict={}
+        empty_norad_ids = norad_ids.copy()
+        days_before = 0
+        # Iterates until all norad_id has TLE content
+        while len(empty_norad_ids) != 0 and days_before <= 7:
+            print('======= FETCH TLE ==========')
+            print(('Empty norad_ids: {}'.format(empty_norad_ids)))
+            print(('Days before: {}'.format(days_before)))
 
-        tle_list = json.loads(response)
+            # Moves the window of time x days before
+            # Search from the given date and 3 days ahead, in case there is no data for our target date
+            decay_epoch = op.inclusive_range((dt + timedelta(- days_before)), (dt + timedelta(3 - days_before)))
+            print(('Decay_epoch: {}'.format(decay_epoch)))
 
-        # filter to just one TLE per norad_id
-        for norad_id, tles in it.groupby(tle_list, key=lambda x: x['NORAD_CAT_ID']):
-            # take the first one which will be the earliest timestamp
-            yield list(tles)[0]
+            # Requests the list of TLE
+            response = st.tle(norad_cat_id=','.join(empty_norad_ids), orderby='NORAD_CAT_ID', format='json', epoch=decay_epoch)
+            tle_list = json.loads(response)
+
+            # filter to just one TLE per norad_id
+            for norad_id, tles_group in it.groupby(tle_list, key=lambda x: x['NORAD_CAT_ID']):
+                norad_dict[norad_id]=[tle for tle in tles_group]
+                empty_norad_ids.remove(norad_id)
+
+            days_before+=1
+            if len(empty_norad_ids) > 0:
+                # Suspend to avoid https://pythonhosted.org/spacetrack/usage.html#rate-limiter
+                print('Suspend for at least 20 seconds...')
+                sleep(20)
+
+        # Collect all tles from dictionary
+        for tles_list_by_norad in norad_dict.values():
+            for tle in tles_list_by_norad:
+                yield tle
+
+
 
 def mycallback(until):
     duration = int(round(until - time.time()))
-    print('Sleeping for {:d} seconds.'.format(duration))
+    print(('Sleeping for {:d} seconds.'.format(duration)))
 
 def as_timestamp(dt):
     return (pytz.UTC.localize(dt) - EPOCH).total_seconds()
@@ -76,7 +104,7 @@ def satellite_locations(tles, dt):
         tle_lines = [str(tle['TLE_LINE%s' % i]) for i in range(3)]
         orbit = ephem.readtle(*tle_lines)
 
-        for ts in xrange(start_ts, end_ts):
+        for ts in range(start_ts, end_ts):
             orbit.compute(datetime.utcfromtimestamp(ts).strftime("%Y/%m/%d %H:%M:%S"))
             lon = ephem.degrees(orbit.sublong) * 180 / 3.1416
             lat = ephem.degrees(orbit.sublat) * 180 / 3.1416

@@ -1,1 +1,1 @@
-from sat_locations import SatLocations
+from .sat_locations import SatLocations
