@@ -15,7 +15,9 @@ Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to
 ### Added
 
 * [GlobalFishingWatch/GFW-Tasks#1181](https://github.com/GlobalFishingWatch/GFW-Tasks/issues/1181): Adds
-  replace flag when uploads the information to BigQuery tables.
+  replace flag for tables in BigQuery.
+  support for norad_id's when on some days the server SpaceTrack API doesn't give us data. Limits this feature for a maximum of 7 days.
+  support for python3.7 and pipe-tools:v3.1.0.
 
 
 ### Changed
