@@ -53,14 +53,17 @@ class SatLocations():
 
 
     def store(self, messages, json_file_name, destination_table, schema):
-        print "storing json_file_name=%s schema=%s" % (json_file_name, schema)
-        print "writing the tle file"
+        print(("storing json_file_name=%s schema=%s" % (json_file_name, schema)))
+        print("writing the tle file")
         with open(json_file_name, 'w') as outfile:
+            index=0
             for message in messages:
-                print '.',
+                if index%1000 == 0:
+                    print('.', end='')
                 json.dump(message, outfile)
                 outfile.write("\n")
-            print "closing the file"
+                index+=1
+            print("closing the file")
             outfile.close()
 
         BOTO_PARALLEL_PROCESS=76
@@ -71,7 +74,7 @@ class SatLocations():
         print(command)
         os.system(command)
 
-        command=('bq load --source_format=NEWLINE_DELIMITED_JSON '
+        command=('bq load --replace=true --source_format=NEWLINE_DELIMITED_JSON '
                  '--project_id=world-fishing-827 '
                  '\'%s_%s\' %s %s' % (destination_table, self.str_date, gcsp_path_file, schema))
         print(command)
@@ -103,7 +106,7 @@ if __name__ == '__main__':
 
     start_time = time.time()
 
-    print "norad_ids=%s" % (norad_ids)
+    print(("norad_ids=%s" % (norad_ids)))
 
     if not os.path.exists("download"):
         os.makedirs("download")
@@ -115,6 +118,6 @@ if __name__ == '__main__':
     rmtree("download")
 
     ### ALL DONE
-    print("Execution time {0} minutes".format((time.time()-start_time)/60))
+    print(("Execution time {0} minutes".format((time.time()-start_time)/60)))
 
 
