@@ -70,8 +70,8 @@ def fetch_TLE(st_auth, norad_ids, dt):
             days_before+=1
             if len(empty_norad_ids) > 0:
                 # Suspend to avoid https://pythonhosted.org/spacetrack/usage.html#rate-limiter
-                print('Suspend for at least 20 seconds...')
-                sleep(20)
+                print('Suspend for at least 40 seconds...')
+                sleep(40)
 
         # Collect all tles from dictionary and force to choose the first one.
         for tles_list_by_norad in norad_dict.values():
