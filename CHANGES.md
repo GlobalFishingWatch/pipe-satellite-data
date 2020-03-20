@@ -10,6 +10,13 @@ Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to
 
 ### Added
 
+## v2.0.1 - 2020-03-04
+
+### Added
+
+* [GlobalFishingWatch/gfw-eng-tasks#20](https://github.com/GlobalFishingWatch/gfw-eng-tasks/issues/20): Adds
+  fix to store only one TLE, instead of all the server returns, by norad_id by day.
+
 ## v2.0.0 - 2020-02-11
 
 ### Added

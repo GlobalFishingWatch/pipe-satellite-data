@@ -2,7 +2,7 @@
 Micro pipeline that process satellite_data queries
 """
 
-__version__ = '2.0.0'
+__version__ = '2.0.1'
 __author__ = 'Matias Piano'
 __email__ = 'matias@globalfishingwatch.org'
 __source__ = 'https://github.com/GlobalFishingWatch/pipe-satellite-data'

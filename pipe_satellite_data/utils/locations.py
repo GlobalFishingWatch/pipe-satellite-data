@@ -64,6 +64,7 @@ def fetch_TLE(st_auth, norad_ids, dt):
             # filter to just one TLE per norad_id
             for norad_id, tles_group in it.groupby(tle_list, key=lambda x: x['NORAD_CAT_ID']):
                 norad_dict[norad_id]=[tle for tle in tles_group]
+                print(('Norad<{}> has {} TLE'.format(norad_id,len(norad_dict[norad_id]))))
                 empty_norad_ids.remove(norad_id)
 
             days_before+=1
@@ -72,9 +73,10 @@ def fetch_TLE(st_auth, norad_ids, dt):
                 print('Suspend for at least 20 seconds...')
                 sleep(20)
 
-        # Collect all tles from dictionary
+        # Collect all tles from dictionary and force to choose the first one.
         for tles_list_by_norad in norad_dict.values():
-            for tle in tles_list_by_norad:
+            first_tle=[tles_list_by_norad[0]]
+            for tle in first_tle:
                 yield tle
 
 
