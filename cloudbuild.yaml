@@ -1,0 +1,38 @@
+steps:
+- name: 'gcr.io/cloud-builders/docker'
+  id: build
+  args: [
+    'build',
+    '-t', '${_BASE_IMAGE_NAME}:${TAG_NAME}',
+    '-t', '${_BASE_IMAGE_NAME}:latest',
+    '.',
+  ]
+
+- name: 'gcr.io/cloud-builders/docker'
+  id: test
+  args: [
+    'run',
+    '--rm',
+    '--entrypoint', 'py.test',
+    '${_BASE_IMAGE_NAME}:latest',
+  ]
+
+- name: 'gcr.io/cloud-builders/docker'
+  id: push-tag
+  args: [
+    'push',
+    '${_BASE_IMAGE_NAME}:${TAG_NAME}'
+  ]
+
+- name: 'gcr.io/cloud-builders/docker'
+  id: push-latest
+  args: [
+    'push',
+    '${_BASE_IMAGE_NAME}:latest'
+  ]
+
+timeout: 600s
+substitutions:
+  _BASE_IMAGE_NAME: 'gcr.io/${PROJECT_ID}/pipe-satellite-data'
+options:
+  dynamic_substitutions: true

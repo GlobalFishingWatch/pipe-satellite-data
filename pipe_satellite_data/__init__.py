@@ -7,7 +7,7 @@ __author__ = 'Matias Piano'
 __email__ = 'matias@globalfishingwatch.org'
 __source__ = 'https://github.com/GlobalFishingWatch/pipe-satellite-data'
 __license__ = """
-Copyright 2018 Global Fishing Watch Inc.
+Copyright 2022 Global Fishing Watch Inc.
 Authors:
 
 Matias Piano <matias@globalfishingwatch.org>

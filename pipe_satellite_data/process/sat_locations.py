@@ -1,14 +1,13 @@
-import json
-import os
-import argparse
-import time
-from shutil import rmtree
-from itertools import tee
-
 from dateutil.parser import parse as dateutil_parse
 
-from pipe_satellite_data.utils.locations import satellite_locations
+from itertools import tee
+
 from pipe_satellite_data.utils.locations import fetch_TLE
+from pipe_satellite_data.utils.locations import satellite_locations
+
+from shutil import rmtree
+
+import argparse, json, os, time
 
 class SatLocations():
     def __init__(self, space_track_user, space_track_password, destination_bucket, destination_tle, destination_sat_locations, schema_directory):
@@ -82,7 +81,7 @@ class SatLocations():
 
 
 
-if __name__ == '__main__':
+def main(args):
 
     parser = argparse.ArgumentParser(description='Downloads Satellite data using the REST API uploads to GCS and BQ.')
     parser.add_argument('-u','--auth_user', help='The Username to access the Space Track API', required=True)
@@ -92,17 +91,19 @@ if __name__ == '__main__':
     parser.add_argument('-bqt','--bq_tle', help='Big Query Table project:dataset.table to store TLE items', required=True)
     parser.add_argument('-bqsl','--bq_sat_locations', help='Big Query Table project:dataset.table to store Satellite Locations', required=True)
     parser.add_argument('-nrids','--norad_ids', nargs='+', help='List of norad_ids or satellite names', required=True)
-    parser.add_argument('-sd','--schema_dir', help='Complete path to the directory where are the schemas', required=True)
-    args = parser.parse_args()
+    parser.add_argument('-sd','--schema_dir',
+                        help='Complete path to the directory where are the schemas',
+                        default='/opt/project/assets')
+    args_parsed = parser.parse_args(args)
 
-    auth_user = args.auth_user
-    auth_pass = args.auth_pass
-    date = args.date
-    gcs_path = args.gcs_path
-    bq_tle = args.bq_tle
-    bq_sat_locations = args.bq_sat_locations
-    norad_ids = args.norad_ids
-    schema_dir = args.schema_dir
+    auth_user = args_parsed.auth_user
+    auth_pass = args_parsed.auth_pass
+    date = args_parsed.date
+    gcs_path = args_parsed.gcs_path
+    bq_tle = args_parsed.bq_tle
+    bq_sat_locations = args_parsed.bq_sat_locations
+    norad_ids = args_parsed.norad_ids
+    schema_dir = args_parsed.schema_dir
 
     start_time = time.time()
 
@@ -120,4 +121,8 @@ if __name__ == '__main__':
     ### ALL DONE
     print(("Execution time {0} minutes".format((time.time()-start_time)/60)))
 
+
+if __name__ == '__main__':
+    import sys
+    main(sys.argv[1:])
 
