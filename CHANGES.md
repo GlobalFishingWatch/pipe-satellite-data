@@ -8,7 +8,16 @@ Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to
 
 ## [Unreleased]
 
+## v3.0.0 - 2022-04-26
+
 ### Added
+
+* [PIPELINE-756](https://globalfishingwatch.atlassian.net/browse/PIPELINE-756): Adds
+  cloudbuild and tests.
+  Drops pipe-tool dependencies.
+  Drops bash scripting, uses python instead
+  Drops Travis dependency.
+  Uses new base image.
 
 ## v2.0.1 - 2020-03-04
 
