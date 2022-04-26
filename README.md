@@ -25,13 +25,13 @@ docker-compose run gcloud auth login
 
 ## CLI
 
-The pipeline includes a CLI that can be used to start both local test runs and
-remote full runs. Just run `docker-compose run pipeline --help` and follow the
+The pipeline includes a CLI.
+Just run `docker-compose run --rm pipe_satellite_data` and follow the
 instructions there.
 
 # License
 
-Copyright 2017 Global Fishing Watch
+Copyright 2022 Global Fishing Watch
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
