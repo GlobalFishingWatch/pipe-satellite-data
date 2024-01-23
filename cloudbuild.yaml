@@ -17,20 +17,9 @@ steps:
     '${_BASE_IMAGE_NAME}:latest',
   ]
 
-- name: 'gcr.io/cloud-builders/docker'
-  id: push-tag
-  args: [
-    'push',
-    '${_BASE_IMAGE_NAME}:${TAG_NAME}'
-  ]
-
-- name: 'gcr.io/cloud-builders/docker'
-  id: push-latest
-  args: [
-    'push',
-    '${_BASE_IMAGE_NAME}:latest'
-  ]
-
+images:
+  - '${_BASE_IMAGE_NAME}:${TAG_NAME}'
+  - '${_BASE_IMAGE_NAME}:latest'
 timeout: 600s
 substitutions:
   _BASE_IMAGE_NAME: 'gcr.io/${PROJECT_ID}/pipe-satellite-data'

@@ -1,4 +1,4 @@
-FROM gcr.io/world-fishing-827/github.com/globalfishingwatch/gfw-pipeline:latest-python3.7
+FROM gcr.io/world-fishing-827/github.com/globalfishingwatch/gfw-pipeline:latest-python3.8
 
 RUN apt-get -y install gdal-bin libgdal-dev
 
