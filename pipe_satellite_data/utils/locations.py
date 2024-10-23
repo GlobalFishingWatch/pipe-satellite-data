@@ -122,5 +122,5 @@ def satellite_locations(tles, dt):
                     altitude=elevation
                 )
         except RuntimeError as e:
-            logging.error(e, f'Error found in TLE: {tle}')
+            logging.error(e, f'Error found in TLE: {tle}.\nCheck satellite status: https://www.n2yo.com/satellite/?s={tle["NORAD_CAT_ID"]}')
             raise e
