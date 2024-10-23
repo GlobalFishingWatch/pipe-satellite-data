@@ -28,6 +28,9 @@ class SatLocations():
 
         # get TLEs for norad_ids for the date
         tles = fetch_TLE(self.st_auth, norad_ids, dt)
+
+        # https://www.space-track.org/documentation#api-basicSpaceDataDecay
+        tles = filter(lambda x: int(x["DECAYED"]) not in [1, 2], tles)
         tles, tles_4_sats = tee(tles)
 
         #store in GCP
