@@ -78,7 +78,10 @@ def fetch_TLE(st_auth, norad_ids, dt):
         for tles_list_by_norad in norad_dict.values():
             first_tle=[tles_list_by_norad[0]]
             for tle in first_tle:
-                yield tle
+                if int(tle["DECAYED"]) not in [1, 2]: # https://www.space-track.org/documentation#api-basicSpaceDataDecay
+                    yield tle
+                else:
+                    logging.info(f'>>> TLE already DECAYED: {tle["NORAD_CAT_ID"]}')
 
 
 
