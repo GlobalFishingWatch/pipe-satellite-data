@@ -13,6 +13,7 @@ import spacetrack.operators as op
 import time
 import udatetime
 import ujson as json
+import logging
 
 
 EPOCH = udatetime.utcfromtimestamp(0)
@@ -77,7 +78,10 @@ def fetch_TLE(st_auth, norad_ids, dt):
         for tles_list_by_norad in norad_dict.values():
             first_tle=[tles_list_by_norad[0]]
             for tle in first_tle:
-                yield tle
+                if int(tle["DECAYED"]) not in [1, 2]: # https://www.space-track.org/documentation#api-basicSpaceDataDecay
+                    yield tle
+                else:
+                    logging.info(f'>>> TLE already DECAYED: {tle["NORAD_CAT_ID"]}')
 
 
 
@@ -103,19 +107,23 @@ def satellite_locations(tles, dt):
     end_ts = start_ts + SECONDS_IN_DAY
 
     for tle in tles:
-        tle_lines = [str(tle['TLE_LINE%s' % i]) for i in range(3)]
-        orbit = ephem.readtle(*tle_lines)
+        try:
+            tle_lines = [str(tle['TLE_LINE%s' % i]) for i in range(3)]
+            orbit = ephem.readtle(*tle_lines)
 
-        for ts in range(start_ts, end_ts):
-            orbit.compute(datetime.utcfromtimestamp(ts).strftime("%Y/%m/%d %H:%M:%S"))
-            lon = ephem.degrees(orbit.sublong) * 180 / 3.1416
-            lat = ephem.degrees(orbit.sublat) * 180 / 3.1416
-            elevation = orbit.elevation
+            for ts in range(start_ts, end_ts):
+                orbit.compute(datetime.utcfromtimestamp(ts).strftime("%Y/%m/%d %H:%M:%S"))
+                lon = ephem.degrees(orbit.sublong) * 180 / 3.1416
+                lat = ephem.degrees(orbit.sublat) * 180 / 3.1416
+                elevation = orbit.elevation
 
-            yield dict(
-                norad_id=tle['NORAD_CAT_ID'],
-                lat=lat,
-                lon=lon,
-                timestamp=ts,
-                altitude=elevation
-            )
+                yield dict(
+                    norad_id=tle['NORAD_CAT_ID'],
+                    lat=lat,
+                    lon=lon,
+                    timestamp=ts,
+                    altitude=elevation
+                )
+        except RuntimeError as e:
+            logging.error(e, f'Error found in TLE: {tle}.\nCheck satellite status: https://www.n2yo.com/satellite/?s={tle["NORAD_CAT_ID"]}')
+            raise e
