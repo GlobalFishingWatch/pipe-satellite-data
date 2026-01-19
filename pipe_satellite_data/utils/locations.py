@@ -1,19 +1,15 @@
 from datetime import datetime
 from datetime import timedelta
+import itertools as it
+import logging
 
-# Using the library https://pythonhosted.org/spacetrack/usage.html
-from spacetrack import SpaceTrackClient
-
-from time import sleep
+import pytz
+import ujson as json
 
 import ephem
-import itertools as it
-import pytz
+from spacetrack import SpaceTrackClient
 import spacetrack.operators as op
-import time
 import udatetime
-import ujson as json
-import logging
 
 
 EPOCH = udatetime.utcfromtimestamp(0)
@@ -35,7 +31,7 @@ def fetch_TLE(st_auth, norad_ids, dt):
     # authenticate to space-track.org API
     st = SpaceTrackClient(identity=st_auth['user'], password=st_auth['password'])
 
-    # remote timezone if present
+    # Remove timezone if present
     dt = dt.replace(tzinfo=None)
 
     # Retrieve all TLE's for all objects in the norad id list
@@ -46,7 +42,7 @@ def fetch_TLE(st_auth, norad_ids, dt):
         # to group and process each object separately) and then by epoch
         # descending, so that we can inspect the most recent record for each
         # object.
-        order_by='NORAD_CAT_ID asc,EPOCH desc',
+        orderby='NORAD_CAT_ID asc,EPOCH desc',
         # Fetch any GP records where the epoc is between 7 days before from the
         # target date, and 3 days after it in case a newer record exists but no
         # records exists for the current date
@@ -56,9 +52,18 @@ def fetch_TLE(st_auth, norad_ids, dt):
     logging.info("Parsing response")
     all_perturbations = json.loads(response)
 
+    # Calculate the date we use to split between taking the latest or the
+    # earliest record available. Because the filter is exclusive, we use the
+    # start of the next day as the boundary
+    ds = (dt + timedelta(days=1)).strftime("%Y-%m-%d")
+    logging.info("Date split %s", ds)
+
     # Select the best TLE for each object independently
     for norad_id, perturbations in it.groupby(all_perturbations, key=lambda x: x['NORAD_CAT_ID']):
-        logging.info("Processing object with norad id {}", norad_id)
+        perturbations = list(perturbations)
+        logging.info("Processing object with norad id %s", norad_id)
+        logging.info("Perturbation epochs: %s", [x["EPOCH"] for x in perturbations])
+
         # For each norad id, we have to select the best perturbation for the
         # timestamp we are processing.
         best_perturbation = None
@@ -67,10 +72,14 @@ def fetch_TLE(st_auth, norad_ids, dt):
         # as long as that epoch is before the target timestamp. However, if
         # there are no records before the target timestamp, then we can use the
         # earliest one after the target timestamp instead.
-        perturbations_before_dt = list(it.dropwhile(lambda x: x["EPOCH"] > dt, perturbations))
-        perturbations_after_dt = list(it.takewhile(lambda x: x["EPOCH"] > dt, perturbations ))
+        perturbations_before_dt = list(filter(lambda x: x["EPOCH"] and x["EPOCH"] < ds, perturbations))
+        logging.info("Perturbation before: %s", [x["EPOCH"] for x in perturbations_before_dt])
+
+        perturbations_after_dt = list(filter(lambda x: x["EPOCH"] and x["EPOCH"] > ds, perturbations))
+        logging.info("Perturbation after: %s", [x["EPOCH"] for x in perturbations_after_dt])
+
         best_perturbation = perturbations_before_dt[0] if perturbations_before_dt else perturbations_after_dt[-1]
-        logging.info("Best perturbation for this object is {}", best_perturbation)
+        logging.info("Best perturbation for this object is %s", best_perturbation)
 
         # We've found the best perturbation for this object. However, if the
         # best perturbation indicates the satellite decayed, then we need to
