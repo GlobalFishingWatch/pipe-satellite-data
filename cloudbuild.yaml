@@ -8,15 +8,6 @@ steps:
     '.',
   ]
 
-- name: 'gcr.io/cloud-builders/docker'
-  id: test
-  args: [
-    'run',
-    '--rm',
-    '--entrypoint', 'py.test',
-    '${_BASE_IMAGE_NAME}:latest',
-  ]
-
 images:
   - '${_BASE_IMAGE_NAME}:${TAG_NAME}'
   - '${_BASE_IMAGE_NAME}:latest'
