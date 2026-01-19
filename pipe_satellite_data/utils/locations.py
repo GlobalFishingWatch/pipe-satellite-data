@@ -1,19 +1,15 @@
 from datetime import datetime
 from datetime import timedelta
+import itertools as it
+import logging
 
-# Using the library https://pythonhosted.org/spacetrack/usage.html
-from spacetrack import SpaceTrackClient
-
-from time import sleep
+import pytz
+import ujson as json
 
 import ephem
-import itertools as it
-import pytz
+from spacetrack import SpaceTrackClient
 import spacetrack.operators as op
-import time
 import udatetime
-import ujson as json
-import logging
 
 
 EPOCH = udatetime.utcfromtimestamp(0)
@@ -34,60 +30,66 @@ def fetch_TLE(st_auth, norad_ids, dt):
 
     # authenticate to space-track.org API
     st = SpaceTrackClient(identity=st_auth['user'], password=st_auth['password'])
-    st.callback = mycallback
 
-    # remote timezone if present
+    # Remove timezone if present
     dt = dt.replace(tzinfo=None)
 
-    norad_ids = [str(i) for i in norad_ids]
+    # Retrieve all TLE's for all objects in the norad id list
+    logging.info("Retrieving perturbation history")
+    response = st.gp_history(
+        norad_cat_id=[str(i) for i in norad_ids],
+        # We want to order the resulting records by norad id first (to be able
+        # to group and process each object separately) and then by epoch
+        # descending, so that we can inspect the most recent record for each
+        # object.
+        orderby='NORAD_CAT_ID asc,EPOCH desc',
+        # Fetch any GP records where the epoc is between 7 days before from the
+        # target date, and 3 days after it in case a newer record exists but no
+        # records exists for the current date
+        epoch=op.inclusive_range(dt - timedelta(days=7), dt + timedelta(days=3)),
+        format="json",
+    )
+    logging.info("Parsing response")
+    all_perturbations = json.loads(response)
 
-    # retrieve potentially multiple TLEs for each norad_id
+    # Calculate the date we use to split between taking the latest or the
+    # earliest record available. Because the filter is exclusive, we use the
+    # start of the next day as the boundary
+    ds = (dt + timedelta(days=1)).strftime("%Y-%m-%d")
+    logging.info("Date split %s", ds)
 
-    if norad_ids:
-        norad_dict={}
-        empty_norad_ids = norad_ids.copy()
-        days_before = 0
-        # Iterates until all norad_id has TLE content
-        while len(empty_norad_ids) != 0 and days_before <= 7:
-            print('======= FETCH TLE ==========')
-            print(('Empty norad_ids: {}'.format(empty_norad_ids)))
-            print(('Days before: {}'.format(days_before)))
+    # Select the best TLE for each object independently
+    for norad_id, perturbations in it.groupby(all_perturbations, key=lambda x: x['NORAD_CAT_ID']):
+        perturbations = list(perturbations)
+        logging.info("Processing object with norad id %s", norad_id)
+        logging.info("Perturbation epochs: %s", [x["EPOCH"] for x in perturbations])
 
-            # Moves the window of time x days before
-            # Search from the given date and 3 days ahead, in case there is no data for our target date
-            decay_epoch = op.inclusive_range((dt + timedelta(- days_before)), (dt + timedelta(3 - days_before)))
-            print(('Decay_epoch: {}'.format(decay_epoch)))
+        # For each norad id, we have to select the best perturbation for the
+        # timestamp we are processing.
+        best_perturbation = None
 
-            # Requests the list of TLE
-            response = st.tle(norad_cat_id=','.join(empty_norad_ids), orderby='NORAD_CAT_ID', format='json', epoch=decay_epoch)
-            tle_list = json.loads(response)
+        # We prefer the latest perturbation (the one with the greatest epoch)
+        # as long as that epoch is before the target timestamp. However, if
+        # there are no records before the target timestamp, then we can use the
+        # earliest one after the target timestamp instead.
+        perturbations_before_dt = list(filter(lambda x: x["EPOCH"] and x["EPOCH"] < ds, perturbations))
+        logging.info("Perturbation before: %s", [x["EPOCH"] for x in perturbations_before_dt])
 
-            # filter to just one TLE per norad_id
-            for norad_id, tles_group in it.groupby(tle_list, key=lambda x: x['NORAD_CAT_ID']):
-                norad_dict[norad_id]=[tle for tle in tles_group]
-                print(('Norad<{}> has {} TLE'.format(norad_id,len(norad_dict[norad_id]))))
-                empty_norad_ids.remove(norad_id)
+        perturbations_after_dt = list(filter(lambda x: x["EPOCH"] and x["EPOCH"] > ds, perturbations))
+        logging.info("Perturbation after: %s", [x["EPOCH"] for x in perturbations_after_dt])
 
-            days_before+=1
-            if len(empty_norad_ids) > 0:
-                # Suspend to avoid https://pythonhosted.org/spacetrack/usage.html#rate-limiter
-                print('Suspend for at least 20 seconds...')
-                sleep(20)
+        best_perturbation = perturbations_before_dt[0] if perturbations_before_dt else perturbations_after_dt[-1]
+        logging.info("Best perturbation for this object is %s", best_perturbation)
 
-        # Collect all tles from dictionary and force to choose the first one.
-        for tles_list_by_norad in norad_dict.values():
-            first_tle=[tles_list_by_norad[0]]
-            for tle in first_tle:
-                if int(tle["DECAYED"]) not in [1, 2]: # https://www.space-track.org/documentation#api-basicSpaceDataDecay
-                    yield tle
-                else:
-                    logging.info(f'>>> TLE already DECAYED: {tle["NORAD_CAT_ID"]}')
+        # We've found the best perturbation for this object. However, if the
+        # best perturbation indicates the satellite decayed, then we need to
+        # skip this object
+        if best_perturbation["DECAY_DATE"]:
+            logging.info("Perturbation is a decay event. Skipping.")
+        else:
+            logging.info("Best perturbation is not a decay event, yielding for processing")
+            yield best_perturbation
 
-
-
-def mycallback(until):
-    duration = int(round(until - time.time()))
-    print(('Sleeping for {:d} seconds.'.format(duration)))
 
 def as_timestamp(dt):
     return (pytz.UTC.localize(dt) - EPOCH).total_seconds()
