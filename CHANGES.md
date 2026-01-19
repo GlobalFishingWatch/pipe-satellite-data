@@ -8,6 +8,15 @@ Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to
 
 ## [Unreleased]
 
+## v4.0.0 - 2026-01-19
+
+### Changed
+
+* [](https://globalfishingwatch.atlassian.net/browse/PIPELINE-3355): Switches
+  to alternative API to download TLE's, which produce incompatible raw data
+  that can't be uploaded with the current schema anymore to BQ. Only satellite
+  positions are uploaded now.
+
 ## v3.0.0 - 2022-04-26
 
 ### Added
