@@ -5,7 +5,7 @@ from setuptools import setup
 
 setup(
     name='pipe-satellite-data',
-    version='4.0.0',
+    version='4.1.0',
     packages=find_packages(exclude=['test*.*', 'tests']),
     install_requires=[
         "ephem~=4.1",
