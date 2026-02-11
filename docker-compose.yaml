@@ -1,4 +1,3 @@
-version: '2'
 services:
   pipe_satellite_data:
     image: gfw/pipe-satellite-data
