@@ -5,10 +5,12 @@ from setuptools import setup
 
 setup(
     name='pipe-satellite-data',
-    version='4.1.0',
+    version='4.2.0',
     packages=find_packages(exclude=['test*.*', 'tests']),
     install_requires=[
         "ephem~=4.1",
+        "google-cloud-bigquery~=3.40",
+        "google-cloud-storage~=3.9",
         "jinja2-cli~=0.8",
         "NewlineJSON~=1.0",
         "nose~=1.3",
@@ -17,7 +19,7 @@ setup(
         "python-dateutil~=2.8",
         "pytz~=2023.3",
         "spacetrack~=1.3",
-        "statistics~=1.0.3",
+        "statistics~=1.0",
         "udatetime~=0.0.17",
         "ujson~=5.9",
     ],
