@@ -7,9 +7,22 @@ import argparse
 from shutil import rmtree
 from itertools import tee
 from dateutil.parser import parse as dateutil_parse
+from urllib.parse import urlparse
+
+from google.cloud import storage
+from google.cloud import bigquery
+from google.cloud.bigquery import LoadJobConfig, SourceFormat
+from google.cloud.bigquery import SchemaField
 
 from pipe_satellite_data.utils.locations import fetch_TLE
 from pipe_satellite_data.utils.locations import satellite_locations
+
+
+def split_gcs_uri(uri: str) -> tuple[str, str]:
+    parsed = urlparse(uri)
+    bucket = parsed.netloc
+    prefix = parsed.path.lstrip("/")
+    return bucket, prefix
 
 
 class SatLocations:
@@ -20,11 +33,15 @@ class SatLocations:
         destination_bucket,
         destination_sat_locations,
         schema_directory,
+        bq_project: str,
+        gcs_project: str,
     ):
         self.st_auth = dict(user=space_track_user, password=space_track_password)
         self.destination_bucket = destination_bucket
         self.destination_sat_locations = destination_sat_locations
         self.schema_directory = schema_directory
+        self.bq_project = bq_project
+        self.gcs_project = gcs_project
 
     def process(self, date_ts, norad_ids):
         # dt = datetimeFromTimestamp(date_ts)
@@ -51,27 +68,55 @@ class SatLocations:
         )
 
     def store(self, records, filename, destination_table=None, schema=None):
+
         logging.info("Writing to local file %s", filename)
+
         with open(filename, "w") as outfile:
             for message in records:
                 json.dump(message, outfile)
                 outfile.write("\n")
 
-        logging.info("Uploading to GCS")
-        gcsp_path_file = "%s/%s" % (self.destination_bucket, os.path.basename(filename))
-        command = "gsutil -m -q cp %s %s" % (filename, gcsp_path_file)
-        logging.info(command)
-        os.system(command)
+        logging.info("Uploading to GCS...")
+
+        bucket_name, prefix = split_gcs_uri(self.destination_bucket)
+        blob_name = f"{prefix}/{os.path.basename(filename)}"
+
+        storage_client = storage.Client(project=self.gcs_project)
+        bucket = storage_client.get_bucket(bucket_name)
+
+        blob = bucket.blob(blob_name)
+        blob.upload_from_filename(filename)
+
+        gcsp_path_file = f"gs://{bucket_name}/{blob_name}"
+        logging.info("Uploaded to %s", gcsp_path_file)
 
         if destination_table and schema:
             logging.info("Loading into BQ table %s", destination_table)
-            command = (
-                "bq load --replace=true --source_format=NEWLINE_DELIMITED_JSON "
-                "--project_id=world-fishing-827 "
-                "'%s_%s' %s %s" % (destination_table, self.str_date, gcsp_path_file, schema)
+
+            with open(schema) as f:
+                schema_json = json.load(f)
+
+            bq_schema = [SchemaField.from_api_repr(field) for field in schema_json]
+
+            table_id = f"{destination_table}_{self.str_date}"
+
+            bq_client = bigquery.Client(project=self.bq_project)
+
+            job_config = LoadJobConfig(
+                source_format=SourceFormat.NEWLINE_DELIMITED_JSON,
+                write_disposition=bigquery.WriteDisposition.WRITE_TRUNCATE,
+                schema=bq_schema,
             )
-            logging.info(command)
-            os.system(command)
+
+            load_job = bq_client.load_table_from_uri(
+                gcsp_path_file,
+                table_id,
+                job_config=job_config,
+            )
+
+            logging.info("Starting BigQuery load job %s", load_job.job_id)
+            load_job.result()
+            logging.info("BigQuery load finished")
 
 
 def main(args):
@@ -99,7 +144,7 @@ def main(args):
     parser.add_argument(
         "-bqsl",
         "--bq_sat_locations",
-        help="Big Query Table project:dataset.table to store Satellite Locations",
+        help="Big Query Table project.dataset.table to store Satellite Locations",
         required=True,
     )
     parser.add_argument(
@@ -115,6 +160,18 @@ def main(args):
         help="Complete path to the directory where are the schemas",
         default="/opt/project/assets",
     )
+    parser.add_argument(
+        "-bqproj",
+        "--bq_project",
+        help="GCP project to use when executing queries.",
+    )
+
+    parser.add_argument(
+        "-gcsproj",
+        "--gcs_project",
+        help="GCP project in which to write the GCS files.",
+    )
+
     args_parsed = parser.parse_args(args)
 
     auth_user = args_parsed.auth_user
@@ -124,6 +181,8 @@ def main(args):
     bq_sat_locations = args_parsed.bq_sat_locations
     norad_ids = args_parsed.norad_ids
     schema_dir = args_parsed.schema_dir
+    bq_project = args_parsed.bq_project
+    gcs_project = args_parsed.gcs_project
 
     start_time = time.time()
 
@@ -132,7 +191,9 @@ def main(args):
     if not os.path.exists("download"):
         os.makedirs("download")
 
-    sat_location = SatLocations(auth_user, auth_pass, gcs_path, bq_sat_locations, schema_dir)
+    sat_location = SatLocations(
+        auth_user, auth_pass, gcs_path, bq_sat_locations, schema_dir, bq_project, gcs_project)
+
     sat_location.process(date, norad_ids)
 
     rmtree("download")
